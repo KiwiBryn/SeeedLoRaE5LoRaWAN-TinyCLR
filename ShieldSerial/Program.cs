@@ -42,7 +42,7 @@ namespace devMobile.IoT.SeeedLoRaE5.ShieldSerial
 
       public static void Main()
       {
-         Debug.WriteLine("devMobile.IoT.SeeedE5.ShieldSerial starting");
+         Debug.WriteLine("devMobile.IoT.SeeedLoRaE5.ShieldSerial starting");
 
          try
          {
