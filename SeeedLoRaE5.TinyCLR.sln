@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "00.ShieldSerial", "ShieldSerial\00.ShieldSerial.csproj", "{034C136A-BC93-4C7C-B4EA-6C18E1D6784F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "01.NetworkJoinOTAA", "NetworkJoinOTAA\01.NetworkJoinOTAA.csproj", "{01E903AE-7B30-4447-9237-B86791DF1B22}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,6 +19,12 @@ Global
 		{034C136A-BC93-4C7C-B4EA-6C18E1D6784F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{034C136A-BC93-4C7C-B4EA-6C18E1D6784F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{034C136A-BC93-4C7C-B4EA-6C18E1D6784F}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{01E903AE-7B30-4447-9237-B86791DF1B22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01E903AE-7B30-4447-9237-B86791DF1B22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01E903AE-7B30-4447-9237-B86791DF1B22}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{01E903AE-7B30-4447-9237-B86791DF1B22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01E903AE-7B30-4447-9237-B86791DF1B22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01E903AE-7B30-4447-9237-B86791DF1B22}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
