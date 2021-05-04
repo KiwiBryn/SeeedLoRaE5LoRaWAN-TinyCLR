@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "00.ShieldSerial", "ShieldSe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "01.NetworkJoinOTAA", "NetworkJoinOTAA\01.NetworkJoinOTAA.csproj", "{01E903AE-7B30-4447-9237-B86791DF1B22}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeeedE5LoRaWANDevice", "SeeedE5LoRaWANDevice\SeeedE5LoRaWANDevice.csproj", "{5FB4886F-9CCD-4E93-BA48-79A726914685}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeeedE5LoRaWANDeviceClient", "SeeedE5LoRaWANDeviceClient\SeeedE5LoRaWANDeviceClient.csproj", "{BE91515C-3D2B-4DA9-B3D6-72CE5EBB6AB6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +29,16 @@ Global
 		{01E903AE-7B30-4447-9237-B86791DF1B22}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{01E903AE-7B30-4447-9237-B86791DF1B22}.Release|Any CPU.Build.0 = Release|Any CPU
 		{01E903AE-7B30-4447-9237-B86791DF1B22}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{5FB4886F-9CCD-4E93-BA48-79A726914685}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FB4886F-9CCD-4E93-BA48-79A726914685}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FB4886F-9CCD-4E93-BA48-79A726914685}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FB4886F-9CCD-4E93-BA48-79A726914685}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE91515C-3D2B-4DA9-B3D6-72CE5EBB6AB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE91515C-3D2B-4DA9-B3D6-72CE5EBB6AB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE91515C-3D2B-4DA9-B3D6-72CE5EBB6AB6}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{BE91515C-3D2B-4DA9-B3D6-72CE5EBB6AB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE91515C-3D2B-4DA9-B3D6-72CE5EBB6AB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE91515C-3D2B-4DA9-B3D6-72CE5EBB6AB6}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
