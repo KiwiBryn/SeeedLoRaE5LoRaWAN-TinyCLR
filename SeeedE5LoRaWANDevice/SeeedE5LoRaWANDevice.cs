@@ -37,14 +37,17 @@ namespace devMobile.IoT.LoRaWan
       Success,
       ATCommandResponseTimeout,
       JoinFailed,
-      JoinedAlready,
-      JoinNetworkFirst,
-      NoFreeChannel,
-      LoRaModemIsBusy,
-      DataRateError,
-      /*
+      ErrorIsInvalidFormat,
+      CommandResponseTimeout,
+      CommandIsUnknown,
+      ParameterIsInvalid,
+      CommandIsInWrongFormat,
       CommandIsUnavilableInCurrentMode,
-      */
+      TooManyParameters,
+      CommandIsTooLong,
+      ReceiveEndSymbolTimeout,
+      InvalidCharacterReceived,
+      CommandError
    }
 
    public class SeeedE5LoRaWANDevice : IDisposable
@@ -69,7 +72,8 @@ namespace devMobile.IoT.LoRaWan
       public readonly TimeSpan JoinTimeoutMaximum = new TimeSpan(0, 0, 20);
 
       private const string EndOfLineMarker = "\r\n";
-      private const string ErrorMarker = "ERROR:";
+      private const string ErrorMarker = "ERROR";
+      private const string JoinFailedMarker = "Join failed";
       private const string ReplyMarker = "+MSGHEX: PORT:";
       private readonly TimeSpan CommandTimeoutDefault = new TimeSpan(0, 0, 5);
 
@@ -173,7 +177,7 @@ namespace devMobile.IoT.LoRaWan
 #if DIAGNOSTICS
          Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+PORT:{port}");
 #endif
-         Result result = SendCommand("OK", $"AT+PORT={port}", CommandTimeoutDefault);
+         Result result = SendCommand($"+PORT: {port}", $"AT+PORT={port}", CommandTimeoutDefault);
          if (result != Result.Success)
          {
 #if DIAGNOSTICS
@@ -547,28 +551,51 @@ namespace devMobile.IoT.LoRaWan
       private Result ModemErrorParser(string errorText)
       {
          Result result = Result.Undefined;
-         /*
-         ushort errorNumber;
+         short errorNumber;
 
          try
          {
-            errorNumber = ushort.Parse(errorText);
+            errorNumber = short.Parse(errorText.Trim('(', ')'));
          }
          catch (Exception)
          {
-            return Result.ResponseInvalid;
+            return Result.ErrorIsInvalidFormat;
          }
 
          switch (errorNumber)
          {
-            case 1:
-               result = ;
+            case -1:
+               result = Result.ParameterIsInvalid;
+               break;
+            case -10:
+               result = Result.CommandIsUnknown;
+               break;
+            case -11:
+               result = Result.CommandIsInWrongFormat;
+               break;
+            case -12:
+               result = Result.CommandIsUnavilableInCurrentMode;
+               break;
+            case -20:
+               result = Result.TooManyParameters;
+               break;
+            case -21:
+               result = Result.CommandIsTooLong;
+               break;
+            case -22:
+               result = Result.ReceiveEndSymbolTimeout;
+               break;
+            case -23:
+               result = Result.InvalidCharacterReceived;
+               break;
+            case -24:
+               result = Result.CommandError;
                break;
             default:
-               result = Result.ResponseInvalid;
+               result = Result.ErrorIsInvalidFormat;
                break;
          }
-         */
+
          return result;
       }
 
@@ -600,6 +627,13 @@ namespace devMobile.IoT.LoRaWan
 #if DIAGNOSTICS
                Debug.WriteLine($" Line :{line} ResponseExpected:{atCommandExpectedResponse} Response:{response}");
 #endif
+               int joinFailIndex = line.IndexOf(JoinFailedMarker);
+               if (joinFailIndex != -1)
+               {
+                  result = Result.JoinFailed;
+                  atExpectedEvent.Set();
+               }
+
                int errorIndex = line.IndexOf(ErrorMarker);
                if (errorIndex != -1)
                {
