@@ -39,7 +39,7 @@ namespace devMobile.IoT.SeeedE5LoRaWANDeviceClient
       private const string Region = "AS923";
       private static readonly TimeSpan JoinTimeOut = new TimeSpan(0, 0, 20);
       private static readonly TimeSpan SendTimeout = new TimeSpan(0, 0, 10);
-      private const byte MessagePort = 1;
+      private const byte MessagePort = 15;
 #if PAYLOAD_BCD
       //private const string PayloadBcd = "54696e79434c52204c6f526157414e"; // TinyCLR LoRaWAN in BCD
       private const string PayloadBcd = "01020304"; //  AQIDBA==
@@ -83,6 +83,14 @@ namespace devMobile.IoT.SeeedE5LoRaWANDeviceClient
                if (result != Result.Success)
                {
                   Debug.WriteLine($"ADR on failed {result}");
+                  return;
+               }
+
+               Debug.WriteLine($"{DateTime.UtcNow:hh:mm:ss} Port");
+               result = device.Port(MessagePort);
+               if (result != Result.Success)
+               {
+                  Debug.WriteLine($"Port on failed {result}");
                   return;
                }
 
