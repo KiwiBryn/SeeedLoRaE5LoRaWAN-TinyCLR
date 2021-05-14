@@ -36,15 +36,15 @@ namespace devMobile.IoT.LoRaWan
       Undefined = 0,
       Success,
       ATCommandResponseTimeout,
-      ParametersInvalid,
-      CommandUnknown,
-      CommandIsInWrongFormat,
+      JoinFailed,
+      JoinedAlready,
+      JoinNetworkFirst,
+      NoFreeChannel,
+      LoRaModemIsBusy,
+      DataRateError,
+      /*
       CommandIsUnavilableInCurrentMode,
-      CommandToManyParameters,
-      CommandIsTooLong,
-      ReceiveSymbolTimeout,
-      InvalidCharacterReceived,
-      // -24 All of Above
+      */
    }
 
    public class SeeedE5LoRaWANDevice : IDisposable
@@ -52,17 +52,14 @@ namespace devMobile.IoT.LoRaWan
       public const ushort BaudRateMinimum = 1200;
       public const ushort BaudRateMaximum = 57600;
       public const ushort RegionIDLength = 5;
-      public const ushort DevEuiLength = 16;
-      public const ushort AppEuiLength = 16;
+      public const ushort AppEuiLength = 23;
       public const ushort AppKeyLength = 32;
-      public const ushort DevAddrLength = 8;
+      public const ushort DevAddrLength = 11;
       public const ushort NwsKeyLength = 32;
       public const ushort AppsKeyLength = 32;
       public const ushort MessagePortMinimumValue = 1;
       public const ushort MessagePortMaximumValue = 223;
-      public const ushort MessageBytesMinimumLength = 1;
       public const ushort MessageBytesMaximumLength = 242;
-      public const ushort MessageBcdMinimumLength = 1;
       public const ushort MessageBcdMaximumLength = 484;
 
       public readonly TimeSpan SendTimeoutMinimum = new TimeSpan(0, 0, 1);
@@ -232,13 +229,13 @@ namespace devMobile.IoT.LoRaWan
       {
          // Wakeup the E5 Module
 #if DIAGNOSTICS
-         Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} device:sleep:0");
+         Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+LOWPOWER: WAKEUP");
 #endif
          Result result = SendCommand("+LOWPOWER: WAKEUP", $"A", CommandTimeoutDefault);
          if (result != Result.Success)
          {
 #if DIAGNOSTICS
-            Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} device:sleep failed {result}");
+            Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+LOWPOWER: WAKEUP failed {result}");
 #endif
             return result;
          }
@@ -314,20 +311,15 @@ namespace devMobile.IoT.LoRaWan
 
          // set the devAddr
 #if DIAGNOSTICS
-         Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+ID=DEVADR,\"{devAddr}\"");
+         Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+ID=DEVADDR,\"{devAddr}\"");
 #endif
-         StringBuilder devAdrWithColons = new StringBuilder(devAddr);
+         StringBuilder devAddrWithSpaces = new StringBuilder(devAddr);
 
-         for (int i = 6; i >= 2; i -= 2)
-         {
-            devAdrWithColons.Insert(i, ":", 1);
-         }
-
-         result = SendCommand("OK", $"AT+ID=DEVADR,\"{devAddr}\"", CommandTimeoutDefault);
+         result = SendCommand($"+ID: DevAddr, {devAddr}", $"AT+ID=DEVADDR,\"{devAddrWithSpaces.Replace(':', ' ')}\"", CommandTimeoutDefault);
          if (result != Result.Success)
          {
 #if DIAGNOSTICS
-            Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+ID=DEVADR failed {result}");
+            Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+ID=DEVADDR failed {result}");
 #endif
             return result;
          }
@@ -336,7 +328,7 @@ namespace devMobile.IoT.LoRaWan
 #if DIAGNOSTICS
          Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+KEY=NWKSKEY:\"{nwksKey}\"");
 #endif
-         result = SendCommand($"AT+KEY=NWKSKEY:\"{nwksKey}\"", $"AT+KEY=NWKSKEY:\"{nwksKey}\"", CommandTimeoutDefault);
+         result = SendCommand($"+KEY=NWKSKEY:\"{nwksKey}\"", $"AT+KEY=NWKSKEY:\"{nwksKey}\"", CommandTimeoutDefault);
          if (result != Result.Success)
          {
 #if DIAGNOSTICS
@@ -347,9 +339,9 @@ namespace devMobile.IoT.LoRaWan
 
          // Set the appsKey
 #if DIAGNOSTICS
-         Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+KEY=APPSKEY:\"{nwksKey}\"");
+         Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+KEY=APPSKEY:\"{appsKey}\"");
 #endif
-         result = SendCommand($"AT+KEY=NWKSKEY:\"{appsKey}\"", $"AT+KEY=APPSKEY:\"{appsKey}\"", CommandTimeoutDefault);
+         result = SendCommand($"+KEY=APPSKEY:\"{appsKey}\"", $"AT+KEY=APPSKEY:\"{appsKey}\"", CommandTimeoutDefault);
          if (result != Result.Success)
          {
 #if DIAGNOSTICS
@@ -386,16 +378,11 @@ namespace devMobile.IoT.LoRaWan
 
          // Set the appEUI
 #if DIAGNOSTICS
-         Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+ID=AppEui:{appEui}");
+         Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+ID=APPEUI:{appEui}");
 #endif
-         StringBuilder appEuiWithColons = new StringBuilder(appEui);
+         StringBuilder appEuiWithSpaces = new StringBuilder(appEui);
 
-         for (int i = 14; i >= 2; i -= 2)
-         {
-            appEuiWithColons.Insert(i, ":", 1);
-         }
-
-         result = SendCommand($"+ID: AppEui, {appEuiWithColons}", $"AT+ID=AppEui,\"{appEui}\"", CommandTimeoutDefault);
+         result = SendCommand($"+ID: AppEui, {appEui}", $"AT+ID=APPEUI,\"{appEuiWithSpaces.Replace(':', ' ')}\"", CommandTimeoutDefault);
          if (result != Result.Success)
          {
 #if DIAGNOSTICS
@@ -420,7 +407,7 @@ namespace devMobile.IoT.LoRaWan
          return Result.Success;
       }
 
-      public Result Join(TimeSpan timeout)
+      public Result Join(bool force, TimeSpan timeout)
       {
          Result result;
 
@@ -430,14 +417,25 @@ namespace devMobile.IoT.LoRaWan
          }
 
          // Join the network
+         if (force)
+         {
 #if DIAGNOSTICS
-         Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} join");
+            Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} +JOIN=FORCE");
 #endif
-         result = SendCommand("+JOIN: Done", $"AT+JOIN=FORCE", timeout);
+            result = SendCommand("+JOIN: Done", $"AT+JOIN=FORCE", timeout);
+         }
+         else
+         {
+#if DIAGNOSTICS
+            Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+JOIN");
+#endif
+            result = SendCommand("+JOIN: Done", $"AT+JOIN", timeout);
+         }
+
          if (result != Result.Success)
          {
 #if DIAGNOSTICS
-            Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} join failed {result}");
+            Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+JOIN failed {result}");
 #endif
             return result;
          }
@@ -449,9 +447,9 @@ namespace devMobile.IoT.LoRaWan
       {
          Result result;
 
-         if ((payload == null) || (payload.Length < MessageBcdMinimumLength) || (payload.Length > MessageBcdMaximumLength))
+         if ((payload == null) || (payload.Length > MessageBcdMaximumLength))
          {
-            throw new ArgumentException($"payload invalid length must be greater than or equal to  {MessageBcdMinimumLength} and less than or equal to {MessageBcdMaximumLength} BCD characters long", "payload");
+            throw new ArgumentException($"payload invalid length must be less than or equal to {MessageBcdMaximumLength} BCD characters long", "payload");
          }
 
          if ((timeout < SendTimeoutMinimum) || (timeout > SendTimeoutMaximum))
@@ -460,21 +458,38 @@ namespace devMobile.IoT.LoRaWan
          }
 
          // Send message the network
-#if DIAGNOSTICS
-         Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} Send payload {payload} timeout {timeout.TotalSeconds} seconds");
-#endif
          if (confirmed)
          {
-            result = SendCommand("+MSGHEX: Done", $"AT+CMSGHEX=\"{payload}\"", timeout);
+#if DIAGNOSTICS
+            Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} +CMSGHEX payload {payload} timeout {timeout.TotalSeconds} seconds");
+#endif
+            if (payload.Length > 0)
+            {
+               result = SendCommand("+MSGHEX: Done", $"AT+CMSGHEX=\"{payload}\"", timeout);
+            }
+            else
+            {
+               result = SendCommand("+MSGHEX: Done", $"AT+CMSGHEX", timeout);
+            }
          }
          else
          {
-            result = SendCommand("+MSGHEX: Done", $"AT+MSGHEX=\"{payload}\"", timeout);
+#if DIAGNOSTICS
+            Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} +MSGHEX payload {payload} timeout {timeout.TotalSeconds} seconds");
+#endif
+            if (payload.Length > 0)
+            {
+               result = SendCommand("+MSGHEX: Done", $"AT+MSGHEX=\"{payload}\"", timeout);
+            }
+            else
+            {
+               result = SendCommand("+MSGHEX: Done", $"AT+MSGHEX", timeout);
+           }
          }
          if (result != Result.Success)
          {
 #if DIAGNOSTICS
-            Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} send failed {result}");
+            Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+MSGHEX failed {result}");
 #endif
             return result;
          }
@@ -484,9 +499,9 @@ namespace devMobile.IoT.LoRaWan
 
       public Result Send(byte[] payloadBytes, bool confirmed, TimeSpan timeout)
       {
-         if ((payloadBytes == null) || (payloadBytes.Length < MessageBytesMinimumLength) || (payloadBytes.Length > MessageBytesMaximumLength))
+         if ((payloadBytes == null) || (payloadBytes.Length > MessageBytesMaximumLength))
          {
-            throw new ArgumentException($"payload invalid length must be greater than or equal to {MessageBytesMinimumLength} and less than or equal to {MessageBytesMaximumLength} bytes long", "payloadBytes");
+            throw new ArgumentException($"payload invalid length must be less than or equal to {MessageBytesMaximumLength} bytes long", "payloadBytes");
          }
 
          if ((timeout < SendTimeoutMinimum) || (timeout > SendTimeoutMaximum))
@@ -563,7 +578,7 @@ namespace devMobile.IoT.LoRaWan
          {
             return;
          }
-
+         
          byte[] rxBuffer = new byte[e.Count];
 
          // read all available bytes from the Serial Device input stream
