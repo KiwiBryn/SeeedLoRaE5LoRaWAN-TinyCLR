@@ -69,7 +69,7 @@ namespace devMobile.IoT.LoRaWan
       public readonly TimeSpan SendTimeoutMaximum = new TimeSpan(0, 0, 30);
 
       public readonly TimeSpan JoinTimeoutMinimum = new TimeSpan(0, 0, 1);
-      public readonly TimeSpan JoinTimeoutMaximum = new TimeSpan(0, 0, 20);
+      public readonly TimeSpan JoinTimeoutMaximum = new TimeSpan(0, 0, 25);
 
       private const string EndOfLineMarker = "\r\n";
       private const string ErrorMarker = "ERROR";
@@ -469,11 +469,11 @@ namespace devMobile.IoT.LoRaWan
 #endif
             if (payload.Length > 0)
             {
-               result = SendCommand("+MSGHEX: Done", $"AT+CMSGHEX=\"{payload}\"", timeout);
+               result = SendCommand("+CMSGHEX: Done", $"AT+CMSGHEX=\"{payload}\"", timeout);
             }
             else
             {
-               result = SendCommand("+MSGHEX: Done", $"AT+CMSGHEX", timeout);
+               result = SendCommand("+CMSGHEX: Done", $"AT+CMSGHEX", timeout);
             }
          }
          else
@@ -689,7 +689,6 @@ namespace devMobile.IoT.LoRaWan
       public static string BytesToBcd(byte[] payloadBytes)
       {
          Debug.Assert(payloadBytes != null);
-         Debug.Assert(payloadBytes.Length > 0);
 
          StringBuilder payloadBcd = new StringBuilder(BitConverter.ToString(payloadBytes));
 
