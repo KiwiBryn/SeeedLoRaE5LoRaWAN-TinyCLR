@@ -37,15 +37,14 @@ namespace devMobile.IoT.SeeedE5LoRaWANDeviceClient
       private const string SerialPortId = SC20100.UartPort.Uart5;
 #endif
       private const string Region = "AS923";
-      private static readonly TimeSpan JoinTimeOut = new TimeSpan(0, 0, 20);
+      private static readonly TimeSpan JoinTimeOut = new TimeSpan(0, 0, 25);
       private static readonly TimeSpan SendTimeout = new TimeSpan(0, 0, 10);
       private const byte MessagePort = 15;
 #if PAYLOAD_BCD
-      //private const string PayloadBcd = "54696e79434c52204c6f526157414e"; // TinyCLR LoRaWAN in BCD
-      private const string PayloadBcd = "01020304"; //  AQIDBA==
+      private const string PayloadBcd = "010203040506070809";
 #endif
 #if PAYLOAD_BYTES
-      private static readonly byte[] PayloadBytes = { 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x4c, 0x6f, 0x52, 0x61, 0x57, 0x41, 0x4e}; // Hello LoRaWAN in bytes
+      private static readonly byte[] PayloadBytes = { 0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
 #endif
 
       public static void Main()
@@ -125,19 +124,21 @@ namespace devMobile.IoT.SeeedE5LoRaWANDeviceClient
 
                while (true)
                {
-                  Debug.WriteLine($"{DateTime.UtcNow:hh:mm:ss} payload BCD:{PayloadBcd}");
+#if PAYLOAD_BCD
+                  Debug.WriteLine($"{DateTime.UtcNow:hh:mm:ss} Send Timeout:{SendTimeout.TotalSeconds} Seconds payload BCD:{PayloadBcd}");
 #if CONFIRMED
                   result = device.Send(PayloadBcd, true, SendTimeout);
 #else
                   result = device.Send(PayloadBcd, false, SendTimeout);
 #endif
+#endif
 
 #if PAYLOAD_BYTES
-                  Debug.WriteLine($"{DateTime.UtcNow:hh:mm:ss} Send Timeout:{SendTimeout:hh:mm:ss} payload Bytes:{BitConverter.ToString(PayloadBytes)}");
+                  Debug.WriteLine($"{DateTime.UtcNow:hh:mm:ss} Send Timeout:{SendTimeout.TotalSeconds} Seconds payload Bytes:{BitConverter.ToString(PayloadBytes)}");
 #if CONFIRMED
                   result = device.Send(PayloadBytes, true, SendTimeout);
 #else
-                  result = device.Send(PayloadBcd, false, SendTimeout);
+                  result = device.Send(PayloadBytes, false, SendTimeout);
 #endif
 #endif
                   if (result != Result.Success)
