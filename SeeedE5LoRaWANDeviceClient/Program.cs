@@ -172,12 +172,12 @@ namespace devMobile.IoT.SeeedE5LoRaWANDeviceClient
          }
       }
 
-      static void OnMessageConfirmationHandler(int rssi, int snr)
+      static void OnMessageConfirmationHandler(int rssi, double snr)
       {
          Debug.WriteLine($"{DateTime.UtcNow:hh:mm:ss} Send Confirm RSSI:{rssi} SNR:{snr}");
       }
 
-      static void OnReceiveMessageHandler(int port, int rssi, int snr, string payloadBcd)
+      static void OnReceiveMessageHandler(int port, int rssi, double snr, string payloadBcd)
       {
          byte[] payloadBytes = SeeedE5LoRaWANDevice.BcdToByes(payloadBcd);
 

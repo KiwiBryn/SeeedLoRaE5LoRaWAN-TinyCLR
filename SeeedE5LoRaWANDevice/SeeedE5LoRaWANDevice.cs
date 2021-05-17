@@ -74,7 +74,10 @@ namespace devMobile.IoT.LoRaWan
       private const string EndOfLineMarker = "\r\n";
       private const string ErrorMarker = "ERROR";
       private const string JoinFailedMarker = "Join failed";
-      private const string ReplyMarker = "+MSGHEX: PORT:";
+      private const string DownlinkPayloadMarker = "+MSGHEX: PORT: ";
+      private const string DownlinkMetricsMarker = "+MSGHEX: RXWIN";
+      private const string DownlinkConfirmedPayloadMarker = "+CMSGHEX: PORT: ";
+      private const string DownlinkConfirmedMetricsMarker = "+CMSGHEX: RXWIN";
       private readonly TimeSpan CommandTimeoutDefault = new TimeSpan(0, 0, 5);
 
       private UartController serialDevice = null;
@@ -83,10 +86,12 @@ namespace devMobile.IoT.LoRaWan
       private readonly AutoResetEvent atExpectedEvent;
       private StringBuilder response;
       private Result result;
+      private byte DownlinkPort = 0 ;
+      private string DownlinkPayload = null;
 
-      public delegate void MessageConfirmationHandler(int rssi, int snr);
+      public delegate void MessageConfirmationHandler(int rssi, double snr);
       public MessageConfirmationHandler OnMessageConfirmation;
-      public delegate void ReceiveMessageHandler(int port, int rssi, int snr, string payload);
+      public delegate void ReceiveMessageHandler(int port, int rssi, double snr, string payload);
       public ReceiveMessageHandler OnReceiveMessage;
 
       public SeeedE5LoRaWANDevice()
@@ -653,32 +658,42 @@ namespace devMobile.IoT.LoRaWan
                   }
                }
 
-               /*
-               int receivedMessageIndex = line.IndexOf(ReplyMarker);
-               if (receivedMessageIndex != -1)
+               // If a downlink message payload then stored ready for metrics
+               if ((line.IndexOf(DownlinkPayloadMarker) != -1) || (line.IndexOf(DownlinkConfirmedPayloadMarker) != -1))
                {
-                  string[] fields = line.Split(" ".ToCharArray());
+                  string receivedMessageLine = line.Substring(DownlinkPayloadMarker.Length);
 
-                  int port = int.Parse(fields[1]);
-                  int rssi = int.Parse(fields[2]);
-                  int snr = int.Parse(fields[3]);
-                  int length = int.Parse(fields[4]);
+                  string[] fields = receivedMessageLine.Split(':', ';');
+                  DownlinkPort = byte.Parse(fields[0]);
+                  DownlinkPayload = fields[2].Trim(' ', '"');
+               }
 
-                  if (this.OnMessageConfirmation != null)
+               //
+               if ((line.IndexOf(DownlinkMetricsMarker) != -1) || (line.IndexOf(DownlinkConfirmedMetricsMarker) != -1))
+               {
+                  string receivedMessageLine = line.Substring(DownlinkMetricsMarker.Length);
+
+                  string[] fields = receivedMessageLine.Split(' ', ',');
+                  int rssi = int.Parse(fields[3]);
+                  double snr = double.Parse(fields[6]);
+
+                  if (DownlinkPort != 0)
                   {
-                     OnMessageConfirmation(rssi, snr);
-                  }
-                  if (length > 0)
-                  {
-                     string payload = fields[5];
-
                      if (this.OnReceiveMessage != null)
                      {
-                        OnReceiveMessage(port, rssi, snr, payload);
+                        OnReceiveMessage(DownlinkPort, rssi, snr, DownlinkPayload);
+                     }
+                     DownlinkPort = 0;
+                  }
+
+                  if ( line.IndexOf(DownlinkConfirmedMetricsMarker) != -1)
+                  {
+                     if (this.OnMessageConfirmation != null)
+                     {
+                        OnMessageConfirmation(rssi, snr);
                      }
                   }
                }
-               */
             }
          }
          while (eolPosition != -1);
