@@ -429,7 +429,7 @@ namespace devMobile.IoT.LoRaWan
          if (force)
          {
 #if DIAGNOSTICS
-            Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} +JOIN=FORCE");
+            Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+JOIN=FORCE");
 #endif
             result = SendCommand("+JOIN: Done", $"AT+JOIN=FORCE", timeout);
          }
