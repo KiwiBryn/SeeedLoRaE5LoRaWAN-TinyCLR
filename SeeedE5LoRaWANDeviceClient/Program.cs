@@ -69,6 +69,16 @@ namespace devMobile.IoT.SeeedE5LoRaWANDeviceClient
 #endif
                device.OnReceiveMessage += OnReceiveMessageHandler;
 
+#if RESET
+               Debug.WriteLine($"{DateTime.UtcNow:hh:mm:ss} Reset");
+               result = device.Reset();
+               if (result != Result.Success)
+               {
+                  Debug.WriteLine($"Reset failed {result}");
+                  return;
+               }
+#endif
+
                Debug.WriteLine($"{DateTime.UtcNow:hh:mm:ss} Region {Region}");
                result = device.Region(Region);
                if (result != Result.Success)
@@ -112,7 +122,7 @@ namespace devMobile.IoT.SeeedE5LoRaWANDeviceClient
                   return;
                }
 #endif
-               
+
                Debug.WriteLine($"{DateTime.UtcNow:hh:mm:ss} Join start Timeout:{JoinTimeOut.TotalSeconds} Seconds");
                result = device.Join(true, JoinTimeOut);
                if (result != Result.Success)

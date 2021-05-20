@@ -202,13 +202,30 @@ namespace devMobile.IoT.LoRaWan
          }
 
 #if DIAGNOSTICS
-         Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} +DR={regionID}");
+         Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+DR={regionID}");
 #endif
          Result result = SendCommand($"+DR: {regionID}", $"AT+DR={regionID}", CommandTimeoutDefault);
          if (result != Result.Success)
          {
 #if DIAGNOSTICS
             Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+DR= failed {result}");
+#endif
+            return result;
+         }
+
+         return Result.Success;
+      }
+
+      public Result Reset()
+      {
+#if DIAGNOSTICS
+         Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+RESET");
+#endif
+         Result result = SendCommand($"+RESET: OK", $"AT+RESET", CommandTimeoutDefault);
+         if (result != Result.Success)
+         {
+#if DIAGNOSTICS
+            Debug.WriteLine($" {DateTime.UtcNow:hh:mm:ss} AT+RESET failed {result}");
 #endif
             return result;
          }
