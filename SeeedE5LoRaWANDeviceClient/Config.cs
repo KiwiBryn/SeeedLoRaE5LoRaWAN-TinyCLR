@@ -21,13 +21,13 @@ namespace devMobile.IoT.SeeedE5LoRaWANDeviceClient
    public class Config
    {
 #if OTAA
-      public const string AppEui = "...";
-      public const string AppKey = "...";
+      public const string AppEui = "o0:00:00:00:00:00:00:0o";  
+      public const string AppKey = "01234567890ABCDEF01234567890ABCD";
 #endif
 #if ABP
-      public const string DevAddress = "...";
-      public const string NwksKey = "...";
-      public const string AppsKey = "...";
+      public const string DevAddress = "00:00:00:00";
+      public const string NwksKey = "01234567890ABCDEF01234567890ABCD";
+      public const string AppsKey = "01234567890ABCDEF01234567890ABCD";
 #endif   
    }
 }
