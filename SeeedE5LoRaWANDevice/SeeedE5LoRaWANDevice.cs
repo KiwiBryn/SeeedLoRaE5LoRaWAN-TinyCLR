@@ -573,44 +573,34 @@ namespace devMobile.IoT.LoRaWan
       private Result ModemErrorParser(string errorText)
       {
          Result result = Result.Undefined;
-         short errorNumber;
 
-         try
+         switch (errorText)
          {
-            errorNumber = short.Parse(errorText.Trim('(', ')'));
-         }
-         catch (Exception)
-         {
-            return Result.ErrorIsInvalidFormat;
-         }
-
-         switch (errorNumber)
-         {
-            case -1:
+            case "(-1)":
                result = Result.ParameterIsInvalid;
                break;
-            case -10:
+            case "(-10)":
                result = Result.CommandIsUnknown;
                break;
-            case -11:
+            case "(-11)":
                result = Result.CommandIsInWrongFormat;
                break;
-            case -12:
+            case "(-12)":
                result = Result.CommandIsUnavilableInCurrentMode;
                break;
-            case -20:
+            case "(-20)":
                result = Result.TooManyParameters;
                break;
-            case -21:
+            case "(-21)":
                result = Result.CommandIsTooLong;
                break;
-            case -22:
+            case "(-22)":
                result = Result.ReceiveEndSymbolTimeout;
                break;
-            case -23:
+            case "(-23)":
                result = Result.InvalidCharacterReceived;
                break;
-            case -24:
+            case "(-24)":
                result = Result.CommandError;
                break;
             default:
