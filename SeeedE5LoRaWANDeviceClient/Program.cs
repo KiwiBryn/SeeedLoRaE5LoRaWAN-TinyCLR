@@ -164,7 +164,7 @@ namespace devMobile.IoT.SeeedE5LoRaWANDeviceClient
                      return;
                   }
 
-                  Thread.Sleep(30000);
+                  Thread.Sleep(300000);
 
                   Debug.WriteLine($"{DateTime.UtcNow:hh:mm:ss} Wakeup");
                   result = device.Wakeup();
