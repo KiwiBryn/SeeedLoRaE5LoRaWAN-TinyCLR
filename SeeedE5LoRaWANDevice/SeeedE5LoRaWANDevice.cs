@@ -129,6 +129,9 @@ namespace devMobile.IoT.LoRaWan
 
          serialDevice.DataReceived += SerialDevice_DataReceived;
 
+         // Ignoring the return from this is intentional
+         this.SendCommand("+LOWPOWER: WAKEUP", "AT+LOWPOWER: WAKEUP", SendTimeoutMinimum);
+
          return Result.Success;
       }
 
