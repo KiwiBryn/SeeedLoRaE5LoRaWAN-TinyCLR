@@ -620,93 +620,103 @@ namespace devMobile.IoT.LoRaWan
          {
             return;
          }
-         
-         byte[] rxBuffer = new byte[e.Count];
 
-         // read all available bytes from the Serial Device input stream
-         sender.Read(rxBuffer, 0, e.Count);
-
-         response.Append(UTF8Encoding.UTF8.GetString(rxBuffer));
-
-         int eolPosition;
-         do
+         try
          {
-            // extract a line
-            eolPosition = response.ToString().IndexOf(EndOfLineMarker);
+            byte[] rxBuffer = new byte[e.Count];
 
-            if (eolPosition != -1)
+            // read all available bytes from the Serial Device input stream
+            sender.Read(rxBuffer, 0, e.Count);
+
+            response.Append(UTF8Encoding.UTF8.GetString(rxBuffer));
+
+            int eolPosition;
+            do
             {
-               string line = response.ToString(0, eolPosition);
+               // extract a line
+               eolPosition = response.ToString().IndexOf(EndOfLineMarker);
 
-               response = response.Remove(0, eolPosition + EndOfLineMarker.Length);
+               if (eolPosition != -1)
+               {
+                  string line = response.ToString(0, eolPosition);
+
+                  response = response.Remove(0, eolPosition + EndOfLineMarker.Length);
 #if DIAGNOSTICS
-               Debug.WriteLine($" Line :{line} ResponseExpected:{atCommandExpectedResponse} Response:{response}");
+                  Debug.WriteLine($" Line :{line} ResponseExpected:{atCommandExpectedResponse} Response:{response}");
 #endif
-               int joinFailIndex = line.IndexOf(JoinFailedMarker);
-               if (joinFailIndex != -1)
-               {
-                  result = Result.JoinFailed;
-                  atExpectedEvent.Set();
-               }
-
-               int errorIndex = line.IndexOf(ErrorMarker);
-               if (errorIndex != -1)
-               {
-                  string errorNumber = line.Substring(errorIndex + ErrorMarker.Length);
-
-                  result = ModemErrorParser(errorNumber.Trim());
-                  atExpectedEvent.Set();
-               }
-
-               if (atCommandExpectedResponse != string.Empty)
-               {
-                  int successIndex = line.IndexOf(atCommandExpectedResponse);
-                  if (successIndex != -1)
+                  int joinFailIndex = line.IndexOf(JoinFailedMarker);
+                  if (joinFailIndex != -1)
                   {
-                     result = Result.Success;
+                     result = Result.JoinFailed;
                      atExpectedEvent.Set();
                   }
-               }
 
-               // If a downlink message payload then stored ready for metrics
-               if ((line.IndexOf(DownlinkPayloadMarker) != -1) || (line.IndexOf(DownlinkConfirmedPayloadMarker) != -1))
-               {
-                  string receivedMessageLine = line.Substring(DownlinkPayloadMarker.Length);
-
-                  string[] fields = receivedMessageLine.Split(':', ';');
-                  DownlinkPort = byte.Parse(fields[0]);
-                  DownlinkPayload = fields[2].Trim(' ', '"');
-               }
-
-               //
-               if ((line.IndexOf(DownlinkMetricsMarker) != -1) || (line.IndexOf(DownlinkConfirmedMetricsMarker) != -1))
-               {
-                  string receivedMessageLine = line.Substring(DownlinkMetricsMarker.Length);
-
-                  string[] fields = receivedMessageLine.Split(' ', ',');
-                  int rssi = int.Parse(fields[3]);
-                  double snr = double.Parse(fields[6]);
-
-                  if (DownlinkPort != 0)
+                  int errorIndex = line.IndexOf(ErrorMarker);
+                  if (errorIndex != -1)
                   {
-                     if (this.OnReceiveMessage != null)
-                     {
-                        OnReceiveMessage(DownlinkPort, rssi, snr, DownlinkPayload);
-                     }
-                     DownlinkPort = 0;
+                     string errorNumber = line.Substring(errorIndex + ErrorMarker.Length);
+
+                     result = ModemErrorParser(errorNumber.Trim());
+                     atExpectedEvent.Set();
                   }
 
-                  if ( line.IndexOf(DownlinkConfirmedMetricsMarker) != -1)
+                  if (atCommandExpectedResponse != string.Empty)
                   {
-                     if (this.OnMessageConfirmation != null)
+                     int successIndex = line.IndexOf(atCommandExpectedResponse);
+                     if (successIndex != -1)
                      {
-                        OnMessageConfirmation(rssi, snr);
+                        result = Result.Success;
+                        atExpectedEvent.Set();
+                     }
+                  }
+
+                  // If a downlink message payload then stored ready for metrics
+                  if ((line.IndexOf(DownlinkPayloadMarker) != -1) || (line.IndexOf(DownlinkConfirmedPayloadMarker) != -1))
+                  {
+                     string receivedMessageLine = line.Substring(DownlinkPayloadMarker.Length);
+
+                     string[] fields = receivedMessageLine.Split(':', ';');
+                     DownlinkPort = byte.Parse(fields[0]);
+                     DownlinkPayload = fields[2].Trim(' ', '"');
+                  }
+
+                  //
+                  if ((line.IndexOf(DownlinkMetricsMarker) != -1) || (line.IndexOf(DownlinkConfirmedMetricsMarker) != -1))
+                  {
+                     string receivedMessageLine = line.Substring(DownlinkMetricsMarker.Length);
+
+                     string[] fields = receivedMessageLine.Split(' ', ',');
+                     int rssi = int.Parse(fields[3]);
+                     double snr = double.Parse(fields[6]);
+
+                     if (DownlinkPort != 0)
+                     {
+                        if (this.OnReceiveMessage != null)
+                        {
+                           OnReceiveMessage(DownlinkPort, rssi, snr, DownlinkPayload);
+                        }
+                        DownlinkPort = 0;
+                     }
+
+                     if ( line.IndexOf(DownlinkConfirmedMetricsMarker) != -1)
+                     {
+                        if (this.OnMessageConfirmation != null)
+                        {
+                           OnMessageConfirmation(rssi, snr);
+                        }
                      }
                   }
                }
             }
+            while (eolPosition != -1);
          }
-         while (eolPosition != -1);
+         catch (Exception ex)
+         {
+            Debug.WriteLine($"SerialDevice_DataReceived {ex.Message}");
+            response.Clear();
+            result = Result.Undefined;
+            atExpectedEvent.Set();
+         }
       }
 
       // Utility functions for clients for processing messages payloads to be send, ands messages payloads received.
