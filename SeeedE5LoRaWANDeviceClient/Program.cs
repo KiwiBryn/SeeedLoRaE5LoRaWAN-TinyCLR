@@ -46,6 +46,9 @@ namespace devMobile.IoT.SeeedE5LoRaWANDeviceClient
 #if PAYLOAD_BYTES
       private static readonly byte[] PayloadBytes = { 0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
 #endif
+#if PAYLOAD_COUNTER
+      private static ulong PayloadCounter = 0;
+#endif
 
       public static void Main()
       {
@@ -151,6 +154,16 @@ namespace devMobile.IoT.SeeedE5LoRaWANDeviceClient
                   result = device.Send(PayloadBytes, false, SendTimeout);
 #endif
 #endif
+#if PAYLOAD_COUNTER
+                  Debug.WriteLine($"{DateTime.UtcNow:hh:mm:ss} Send Timeout:{SendTimeout.TotalSeconds} Seconds payload Counter:{PayloadCounter}");
+#if CONFIRMED
+                  result = device.Send(BitConverter.GetBytes(PayloadCounter), true, SendTimeout);
+#else
+                  result = device.Send(BitConverter.GetBytes(PayloadCounter), false, SendTimeout);
+#endif
+                  PayloadCounter += 1;
+#endif
+
                   if (result != Result.Success)
                   {
                      Debug.WriteLine($"Send failed {result}");
@@ -164,7 +177,7 @@ namespace devMobile.IoT.SeeedE5LoRaWANDeviceClient
                      return;
                   }
 
-                  Thread.Sleep(300000);
+                  Thread.Sleep(60000);
 
                   Debug.WriteLine($"{DateTime.UtcNow:hh:mm:ss} Wakeup");
                   result = device.Wakeup();

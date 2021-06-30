@@ -22,7 +22,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;TINYCLR_V2_FEZDUINO,OTAA,PAYLOAD_BCD</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;TINYCLR_V2_FEZDUINO,OTAA,PAYLOAD_COUNTER</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
