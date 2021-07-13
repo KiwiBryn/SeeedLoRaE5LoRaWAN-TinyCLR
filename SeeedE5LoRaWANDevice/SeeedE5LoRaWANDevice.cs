@@ -268,6 +268,10 @@ namespace devMobile.IoT.LoRaWan
 #endif
             return result;
          }
+
+         // Thanks AndrewL for pointing out delay required in section 4.30 LOWPOWER
+         Thread.Sleep(5);
+
          return Result.Success;
       }
 
