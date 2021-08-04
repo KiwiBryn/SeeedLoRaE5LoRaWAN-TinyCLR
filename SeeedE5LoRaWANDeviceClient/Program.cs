@@ -169,6 +169,7 @@ namespace devMobile.IoT.SeeedE5LoRaWANDeviceClient
                      Debug.WriteLine($"Send failed {result}");
                   }
 
+#if LOW_POWER
                   Debug.WriteLine($"{DateTime.UtcNow:hh:mm:ss} Sleep");
                   result = device.Sleep();
                   if (result != Result.Success)
@@ -176,9 +177,10 @@ namespace devMobile.IoT.SeeedE5LoRaWANDeviceClient
                      Debug.WriteLine($"Sleep failed {result}");
                      return;
                   }
-
+#endif
                   Thread.Sleep(60000);
 
+#if LOW_POWER
                   Debug.WriteLine($"{DateTime.UtcNow:hh:mm:ss} Wakeup");
                   result = device.Wakeup();
                   if (result != Result.Success)
@@ -186,6 +188,7 @@ namespace devMobile.IoT.SeeedE5LoRaWANDeviceClient
                      Debug.WriteLine($"Wakeup failed {result}");
                      return;
                   }
+#endif
                }
             }
          }
